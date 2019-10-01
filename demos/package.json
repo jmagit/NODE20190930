@@ -4,7 +4,9 @@
   "description": "Demos del curso de Node",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node hola-mundo",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug": "node --inspect hola-mundo"
   },
   "author": "Javier",
   "license": "MIT",
