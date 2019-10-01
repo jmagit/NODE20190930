@@ -1,0 +1,17 @@
+{
+  "name": "demos",
+  "version": "1.0.0",
+  "description": "Demos del curso de Node",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Javier",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "karma": "^4.3.0"
+  }
+}
