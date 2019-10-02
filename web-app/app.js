@@ -18,10 +18,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.all('/demos', (req, res) => {
-  res.status(200).type('text/plain').end('Educado');
+  res.status(200).type('text/xml').end('<html><body><h1>Educado</h1></body></html>');
 })
-app.get('/demos/saluda', (req, res) => {
-  res.status(200).type('text/plain').end('Hola mundo');
+app.get('/demos/saluda/:nombre', (req, res) => {
+  res.status(200).type('text/plain').end(`Hola ${req.params.nombre}` );
 })
 app.get('/demos/despide', (req, res) => {
   res.status(200).type('text/plain').end('Adios mundo');
