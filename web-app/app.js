@@ -18,7 +18,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 app.use(logger('dev'));
-app.use(express.json());
+//app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.all('/demos', (req, res) => {
@@ -30,6 +30,11 @@ app.get('/demos/saluda/:nombre/*', (req, res) => {
 app.get('/demos/despide', (req, res) => {
   res.status(200).type('text/plain').end('Adios mundo');
 })
+app.get('/google', (req, res) => {
+  if(!res.headersSent)
+    res.redirect(301, 'https://google.es')
+  res.status(500).end();
+})
 app.get('/cotilla/:id/:cmd', (req, res) => {
   let rslt = `ID: ${req.params.id} `;
   if(req.query.page)
@@ -39,6 +44,11 @@ app.get('/cotilla/:id/:cmd', (req, res) => {
     return;
   }
   if(req.query.size) rslt += `size: ${req.query.size} `;
+  if(req.get('Accept-Language')) rslt += `idioma: ${req.get('Accept-Language')} `;
+  if(req.body) {
+    rslt += `nombre: ${req.body.nombre} `;
+    rslt += `apellidos: ${req.body.apellidos} `;
+  }
   res.status(200).type('text/plain').end(rslt);
 })
 
@@ -46,6 +56,7 @@ app.get('/cotilla/:id/:cmd', (req, res) => {
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
 
 
 // error handler
