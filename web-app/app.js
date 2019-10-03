@@ -16,19 +16,22 @@ app.set('view engine', 'jade');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/demos/*', require('./routes/demos'));
 
 app.use(logger('dev'));
-//app.use(express.json());
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.all('/demos', (req, res) => {
-  res.status(200).type('text/xml').end('<html><body><h1>Educado</h1></body></html>');
+
+app.get('/json', (req, res) => {
+  const rslt =  {id: 1, nombre:"Pepito", apellidos:"Grillo"};
+
+  res.status(200).json(rslt);
 })
-app.get('/demos/saluda/:nombre/*', (req, res) => {
-  res.status(200).type('text/plain').end(`Hola ${req.params.nombre}` );
-})
-app.get('/demos/despide', (req, res) => {
-  res.status(200).type('text/plain').end('Adios mundo');
+app.get('/form', (req, res) => {
+  const rslt =  {title: "Demo formulario", id: 1, nombre:"Pepito", apellidos:"Grillo"};
+
+  res.render('persona-form', rslt);
 })
 app.get('/google', (req, res) => {
   if(!res.headersSent)
