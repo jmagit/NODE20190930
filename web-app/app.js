@@ -35,12 +35,20 @@ app.get('/google', (req, res) => {
     res.redirect(301, 'https://google.es')
   res.status(500).end();
 })
-app.get('/cotilla/:id/:cmd', (req, res) => {
+app.get('/cotilla/*', (req, res, next) => {
+  res.locals.di='algo';
+  res.type('text/plain')
+  //res.end();
+  next();
+});
+app.get('/cotilla/:id/:cmd', (req, res, next) => {
   let rslt = `ID: ${req.params.id} `;
   if(req.query.page)
     rslt += `page: ${req.query.page} `;
   else {
-    res.status(400).end('Falta el page');
+    //res.status(400).end('Falta el page');
+    //throw new Error('Falta el page')
+    next(new Error('Falta el page'));
     return;
   }
   if(req.query.size) rslt += `size: ${req.query.size} `;
@@ -49,12 +57,15 @@ app.get('/cotilla/:id/:cmd', (req, res) => {
     rslt += `nombre: ${req.body.nombre} `;
     rslt += `apellidos: ${req.body.apellidos} `;
   }
-  res.status(200).type('text/plain').end(rslt);
+  rslt += `dice: ${res.locals.di} `;
+  res.status(200).end(rslt);
 })
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  res.status(404).end();
+  //next(createError(404));
+  next();
 });
 
 
