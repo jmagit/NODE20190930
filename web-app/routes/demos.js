@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
 
-// router.all('/', (req, res) => {
-//   res.status(200).type('text/xml').end('<html><body><h1>Educado</h1></body></html>');
-// })
+router.all('/', (req, res) => {
+  res.status(200).type('text/xml').end('<html><body><h1>Educado</h1></body></html>');
+})
 router.get('/saluda/:nombre/*', (req, res) => {
   res.status(200).type('text/plain').end(`Hola ${req.params.nombre}` );
 })

@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var demosRouter = require('./routes/demos');
 
 var app = express();
 
@@ -16,7 +17,7 @@ app.set('view engine', 'jade');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/demos/*', require('./routes/demos'));
+app.use('/demos', demosRouter);
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -49,9 +50,9 @@ app.get('/cotilla/:id/:cmd', (req, res, next) => {
   if(req.query.page)
     rslt += `page: ${req.query.page} `;
   else {
-    //res.status(400).end('Falta el page');
+    res.status(400).end('Falta el page');
     //throw new Error('Falta el page')
-    next(new Error('Falta el page'));
+    //next(new Error('Falta el page'));
     return;
   }
   if(req.query.size) rslt += `size: ${req.query.size} `;
