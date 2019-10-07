@@ -3,12 +3,18 @@ extends layout
 block content
   h1= title
   p
-    b Nombre:
+    b Código:&nbsp;
+    span=id
+    br
+    b Nombre:&nbsp;
     span=nombre
     br
-    b Apellidos:
+    b Apellidos:&nbsp;
     span!=apellidos
     br
-    a(href="/") Volver
+    b Edad:&nbsp;
+    span!=edad
+    br
+    a(href="/personas") Volver
   p Hola #{nombre}, te apellidas !{apellidos}, es lo que
     | me has mandado
