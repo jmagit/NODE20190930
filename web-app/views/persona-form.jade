@@ -2,9 +2,11 @@ extends layout
 
 block content
   h1= title
-  form(action='form')
+  form(action='form' method='post')
     label(for='nombre') Nombre:
     input#nombre(type="text" name="nombre" value=nombre)
+    br
     label Apellidos:
       input(type="text" name="apellidos" value=apellidos)
+    br
     input(type="submit" value="Enviar")

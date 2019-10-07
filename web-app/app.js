@@ -34,6 +34,16 @@ app.get('/form', (req, res) => {
 
   res.render('persona-form', rslt);
 })
+app.post('/form', (req, res) => {
+  const rslt =  {
+    title: "Demo respuesta del formulario",
+    id: 1,
+    nombre: req.body.nombre,
+    apellidos: req.body.apellidos
+  };
+
+  res.render('persona-view', rslt);
+})
 app.get('/google', (req, res) => {
   if(!res.headersSent)
     res.redirect(301, 'https://google.es')
