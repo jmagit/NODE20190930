@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var fs = require('fs');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -29,21 +30,47 @@ app.get('/json', (req, res) => {
 
   res.status(200).json(rslt);
 })
-app.get('/form', (req, res) => {
+app.get('/personas', (req, res) => {
+  fs.readFile('data/personas.json', 'utf8', (err, data) => {
+    if(err) throw err;
+    const rslt =  {
+      title: "Mantenimiento de personas",
+      listado: JSON.parse(data)
+    };
+    res.render('persona-list', rslt);
+  });
+})
+app.get('/personas/add', (req, res) => {
   const rslt =  {title: "Demo formulario", id: 1, nombre:"Pepito", apellidos:"Grillo"};
 
   res.render('persona-form', rslt);
 })
-app.post('/form', (req, res) => {
+app.post('/personas/add', (req, res) => {
   const rslt =  {
     title: "Demo respuesta del formulario",
-    id: 1,
+    id: 0,
     nombre: req.body.nombre,
     apellidos: req.body.apellidos
   };
 
   res.render('persona-view', rslt);
 })
+app.get('/personas/:id/edit', (req, res) => {
+  const model =  {title: "Msntenimiento de personas", id: 1, nombre:"Pepito", apellidos:"Grillo"};
+
+  res.render('persona-list', model);
+})
+app.post('/personas/:id/edit', (req, res) => {
+  const rslt =  {
+    title: "Demo respuesta del formulario",
+    id: 0,
+    nombre: req.body.nombre,
+    apellidos: req.body.apellidos
+  };
+
+  res.render('persona-view', rslt);
+})
+
 app.get('/google', (req, res) => {
   if(!res.headersSent)
     res.redirect(301, 'https://google.es')

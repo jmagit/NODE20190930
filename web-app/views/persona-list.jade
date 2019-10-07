@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1= title
+  table
+    tr
+      th Nombre
+      td
+        a(href='personas/add') Añadir
+    each item in listado
+      tr
+        td
+          a(href='personas/' + item.id)=item.nombre + ' ' + item.apellidos
+        td
+          a(href='personas/' + item.id+'/edit') Editar
+          &nbsp;|&nbsp;
+          a(href='personas/' + item.id+'/delete') Borrar
