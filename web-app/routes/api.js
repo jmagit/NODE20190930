@@ -4,8 +4,6 @@ var router = express.Router();
 
 let fich = 'data/personas.json';
 
-router.use(express.json());
-
 router.get('/personas', (req, res) => {
   fs.readFile(fich, 'utf8', (err, data) => {
     if (err) throw err;
