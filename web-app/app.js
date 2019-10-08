@@ -10,6 +10,8 @@ var mysql = require('mysql')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var demosRouter = require('./routes/demos');
+var personasRouter = require('./routes/personas');
+var apiRouter = require('./routes/api');
 
 var app = express();
 
@@ -21,6 +23,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/demos', demosRouter);
+app.use('/personas', personasRouter);
+app.use('/api', apiRouter);
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -68,130 +72,6 @@ app.get('/json', (req, res) => {
 
   res.status(200).json(rslt);
 })
-app.get('/personas', (req, res) => {
-  fs.readFile('data/personas.json', 'utf8', (err, data) => {
-    if (err) throw err;
-    const rslt = {
-      title: "Mantenimiento de personas",
-      listado: JSON.parse(data)
-    };
-    res.render('persona-list', rslt);
-  });
-})
-app.get('/personas/add', (req, res) => {
-  const model = {
-    title: "Añadir persona",
-    url: '/personas/add',
-    id: null,
-    nombre: '',
-    apellidos: '',
-    edad: ''
-
-  };
-  res.render('persona-form', model);
-})
-app.post('/personas/add', (req, res) => {
-  const model = {
-    title: "Añadir persona",
-    url: '/personas/add',
-    id: null,
-    nombre: req.body.nombre,
-    apellidos: req.body.apellidos,
-    edad: req.body.edad,
-    error: []
-  };
-  if (!model.nombre)
-    model.error.push('El nombre es obligatorio');
-  if (model.error.length === 0) {
-    fs.readFile('data/personas.json', 'utf8', (err, data) => {
-      if (err) throw err;
-      let listado = JSON.parse(data);
-      let id = listado.length === 0 ? 1 : (listado[listado.length - 1].id + 1);
-      listado.push({
-        id, nombre: model.nombre, apellidos: model.apellidos,
-        edad: model.edad
-      });
-      fs.writeFile('data/personas.json', JSON.stringify(listado), 'utf8', (err) => {
-        if (err) throw err;
-        res.redirect('/personas');
-      });
-    });
-  } else {
-    res.render('persona-form', model);
-  }
-})
-app.get('/personas/:id/edit', (req, res) => {
-  fs.readFile('data/personas.json', 'utf8', (err, data) => {
-    if (err) throw err;
-    let listado = JSON.parse(data);
-    let rslt = listado.find(item => item.id == req.params.id);
-
-    if (rslt) {
-      const model = {
-        title: "Editar persona",
-        url: `/personas/${req.params.id}/edit`,
-        id: rslt.id,
-        nombre: rslt.nombre,
-        apellidos: rslt.apellidos,
-        edad: rslt.edad
-      };
-      res.render('persona-form', rslt);
-    } else {
-      res.status(404).end();
-    }
-  });
-})
-app.post('/personas/:id/edit', async (req, res) => {
-  const model = {
-    title: "Editar persona",
-    url: `/personas/${req.params.id}/edit`,
-    id: null,
-    nombre: req.body.nombre,
-    apellidos: req.body.apellidos,
-    edad: req.body.edad,
-    error: []
-  };
-  if (!model.nombre)
-    model.error.push('El nombre es obligatorio');
-  if (model.error.length === 0) {
-    let data = await fs.promises.readFile('data/personas.json', 'utf8');
-    let listado = JSON.parse(data);
-    let index = listado.findIndex(item => item.id == req.params.id);
-    if (index === -1) {
-      res.status(404).end();
-    } else {
-      listado[index] = {
-        id: req.params.id, nombre: model.nombre, apellidos: model.apellidos,
-        edad: model.edad
-      };
-      await fs.promises.writeFile('data/personas.json', JSON.stringify(listado), 'utf8');
-      res.redirect('/personas');
-    }
-  } else {
-    res.render('persona-form', model);
-  }
-})
-app.get('/personas/:id', (req, res) => {
-  fs.readFile('data/personas.json', 'utf8', (err, data) => {
-    if (err) throw err;
-    let listado = JSON.parse(data);
-    let rslt = listado.find(item => item.id == req.params.id);
-
-    if (rslt) {
-      const model = {
-        title: "Ver persona",
-        id: rslt.id,
-        nombre: rslt.nombre,
-        apellidos: rslt.apellidos,
-        edad: rslt.edad
-      };
-      res.render('persona-view', rslt);
-    } else {
-      res.status(404).end();
-    }
-  });
-})
-
 
 app.get('/google', (req, res) => {
   if (!res.headersSent)
