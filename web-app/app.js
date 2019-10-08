@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
+var formidable = require("formidable");
+var mysql = require('mysql')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -25,6 +27,42 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+app.use('/files', express.static('uploads'))
+app.get('/fileupload', function (req, res) {
+  res.status(200).end(`
+    <html><body><form action="fileupload" method="post" enctype="multipart/form-data">
+      <input type="file" name="filetoupload"><input type="submit">
+    </form></body></html>
+  `)
+})
+app.post('/fileupload', function (req, res) {
+  let form = new formidable.IncomingForm();
+  form.parse(req, function (err, fields, files) {
+    let newpath = __dirname + "/uploads/" + files.filetoupload.name;
+    fs.copyFile(files.filetoupload.path, newpath, function (err) {
+      if (err) throw err;
+      newpath = "files/" + files.filetoupload.name;
+      res.status(200).end(`<a href="${newpath}">${newpath}</a>`);
+    });
+  });
+})
+
+app.get('/db', (req, res) => {
+  var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'sakila'
+  })
+
+  connection.connect()
+
+  connection.query('SELECT * FROM `sakila`.`category`', function (err, rows, fields) {
+    if (err) throw err
+    res.status(200).json(rows);
+  })
+})
+
 app.get('/json', (req, res) => {
   const rslt = { id: 1, nombre: "Pepito", apellidos: "Grillo" };
 
@@ -39,6 +77,99 @@ app.get('/personas', (req, res) => {
     };
     res.render('persona-list', rslt);
   });
+})
+app.get('/personas/add', (req, res) => {
+  const model = {
+    title: "Añadir persona",
+    url: '/personas/add',
+    id: null,
+    nombre: '',
+    apellidos: '',
+    edad: ''
+
+  };
+  res.render('persona-form', model);
+})
+app.post('/personas/add', (req, res) => {
+  const model = {
+    title: "Añadir persona",
+    url: '/personas/add',
+    id: null,
+    nombre: req.body.nombre,
+    apellidos: req.body.apellidos,
+    edad: req.body.edad,
+    error: []
+  };
+  if (!model.nombre)
+    model.error.push('El nombre es obligatorio');
+  if (model.error.length === 0) {
+    fs.readFile('data/personas.json', 'utf8', (err, data) => {
+      if (err) throw err;
+      let listado = JSON.parse(data);
+      let id = listado.length === 0 ? 1 : (listado[listado.length - 1].id + 1);
+      listado.push({
+        id, nombre: model.nombre, apellidos: model.apellidos,
+        edad: model.edad
+      });
+      fs.writeFile('data/personas.json', JSON.stringify(listado), 'utf8', (err) => {
+        if (err) throw err;
+        res.redirect('/personas');
+      });
+    });
+  } else {
+    res.render('persona-form', model);
+  }
+})
+app.get('/personas/:id/edit', (req, res) => {
+  fs.readFile('data/personas.json', 'utf8', (err, data) => {
+    if (err) throw err;
+    let listado = JSON.parse(data);
+    let rslt = listado.find(item => item.id == req.params.id);
+
+    if (rslt) {
+      const model = {
+        title: "Editar persona",
+        url: `/personas/${req.params.id}/edit`,
+        id: rslt.id,
+        nombre: rslt.nombre,
+        apellidos: rslt.apellidos,
+        edad: rslt.edad
+      };
+      res.render('persona-form', rslt);
+    } else {
+      res.status(404).end();
+    }
+  });
+})
+app.post('/personas/:id/edit', async (req, res) => {
+  const model = {
+    title: "Editar persona",
+    url: `/personas/${req.params.id}/edit`,
+    id: null,
+    nombre: req.body.nombre,
+    apellidos: req.body.apellidos,
+    edad: req.body.edad,
+    error: []
+  };
+  if (!model.nombre)
+    model.error.push('El nombre es obligatorio');
+  if (model.error.length === 0) {
+    let data = await fs.promises.readFile('data/personas.json', 'utf8');
+    let listado = JSON.parse(data);
+    let index = listado.findIndex(item => item.id == req.params.id);
+    if (index === -1) {
+      res.status(404).end();
+    } else {
+      listado[index] = {
+        id: req.params.id, nombre: model.nombre, apellidos: model.apellidos,
+        edad: model.edad
+      };
+      await fs.promises.writeFile('data/personas.json', JSON.stringify(listado), 'utf8');
+      res.redirect('/personas');
+    }
+  } else {
+    res.render('persona-form', model);
+  }
 })
 app.get('/personas/:id', (req, res) => {
   fs.readFile('data/personas.json', 'utf8', (err, data) => {
@@ -61,36 +192,6 @@ app.get('/personas/:id', (req, res) => {
   });
 })
 
-app.get('/personas/add', (req, res) => {
-  const rslt = { title: "Demo formulario", id: 1, nombre: "Pepito", apellidos: "Grillo" };
-
-  res.render('persona-form', rslt);
-})
-app.post('/personas/add', (req, res) => {
-  const rslt = {
-    title: "Demo respuesta del formulario",
-    id: 0,
-    nombre: req.body.nombre,
-    apellidos: req.body.apellidos
-  };
-
-  res.render('persona-view', rslt);
-})
-app.get('/personas/:id/edit', (req, res) => {
-  const model = { title: "Msntenimiento de personas", id: 1, nombre: "Pepito", apellidos: "Grillo" };
-
-  res.render('persona-list', model);
-})
-app.post('/personas/:id/edit', (req, res) => {
-  const rslt = {
-    title: "Demo respuesta del formulario",
-    id: 0,
-    nombre: req.body.nombre,
-    apellidos: req.body.apellidos
-  };
-
-  res.render('persona-view', rslt);
-})
 
 app.get('/google', (req, res) => {
   if (!res.headersSent)

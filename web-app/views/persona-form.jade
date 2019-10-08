@@ -2,11 +2,21 @@ extends layout
 
 block content
   h1= title
-  form(action='form' method='post')
+  if error && error.length > 0
+    h2 Lista de errores
+    ul
+      each item in error
+        li=item
+  form(action=url method='post')
+    if id
+      p <b>Código: </b> #{id}
     label(for='nombre') Nombre:
     input#nombre(type="text" name="nombre" value=nombre)
     br
     label Apellidos:
       input(type="text" name="apellidos" value=apellidos)
+    label Edad:
+      input(type="text" name="edad" value=edad)
     br
     input(type="submit" value="Enviar")
+    a(href="/personas") Volver

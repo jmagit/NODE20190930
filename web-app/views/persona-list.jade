@@ -6,11 +6,11 @@ block content
     tr
       th Nombre
       td
-        a(href='personas/add') Añadir
+        a(href='/personas/add') Añadir
     each item in listado
       tr
         td
-          a(href='personas/' + item.id)=item.nombre + ' ' + item.apellidos
+          a(href='/personas/' + item.id)=item.nombre + ' ' + item.apellidos
         td
           a(href='personas/' + item.id+'/edit') Editar
           &nbsp;|&nbsp;
