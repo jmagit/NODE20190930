@@ -6,6 +6,11 @@ var logger = require('morgan');
 var fs = require('fs');
 var formidable = require("formidable");
 var mysql = require('mysql')
+const jwt = require('jsonwebtoken')
+
+const APP_SECRET = 'Es segura al 99%'
+const AUTHENTICATION_SCHEME = 'Bearer '
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -27,6 +32,25 @@ app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
   res.header('Access-Control-Allow-Credentials', 'true')
   next()
+})
+
+app.use(function (req, res, next) {
+  res.locals.isAutenticated = false;
+  if (!req.headers['authorization']) {
+    next();
+    return;
+  }
+  let token = req.headers['authorization'].substr(AUTHENTICATION_SCHEME.length)
+  try {
+    var decoded = jwt.verify(token, APP_SECRET);
+    res.locals.isAutenticated = true;
+    res.locals.usr = decoded.usr;
+    res.locals.name = decoded.name;
+    res.locals.roles = decoded.roles;
+    next();
+  } catch (err) {
+    res.status(401).end();
+  }
 })
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -114,6 +138,25 @@ app.get('/cotilla/:id/:cmd', (req, res, next) => {
   rslt += `dice: ${res.locals.di} `;
   res.status(200).end(rslt);
 })
+app.get('/seguro', (req, res, next) => {
+  res.type('text/plain');
+  if(res.locals.isAutenticated) {
+    res.end(`Eres ${res.locals.usr} llamado ${res.locals.name}`);
+  } else {
+    res.status(401).end();
+  }
+});
+
+app.post('/login', function (req, res) {
+  let token = AUTHENTICATION_SCHEME + jwt.sign({
+    usr: 'Admin',
+    name: 'Administrador',
+    roles: ['Administradores', 'Usuarios Autenticados']
+  }, APP_SECRET, { expiresIn: '1h' });
+
+  res.status(200).json({ sucess: true, token });
+});
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
