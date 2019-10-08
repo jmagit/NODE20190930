@@ -77,7 +77,24 @@ router.put('/personas/:id', async (req, res) => {
         edad: model.edad
       };
       await fs.promises.writeFile(fich, JSON.stringify(listado), 'utf8');
-      res.status(200).end(model);
+      res.status(200).json(model);
+    }
+  } else {
+    res.status(400).json(errors);
+  }
+})
+router.patch('/personas/:id', async (req, res) => {
+  let  errors = []
+  if (errors.length === 0) {
+    let data = await fs.promises.readFile(fich, 'utf8');
+    let listado = JSON.parse(data);
+    let index = listado.findIndex(item => item.id == req.params.id);
+    if (index === -1) {
+      res.status(404).end();
+    } else {
+      listado[index] = Object.assign(listado[index], req.body);
+      await fs.promises.writeFile(fich, JSON.stringify(listado), 'utf8');
+      res.status(200).json(listado[index]);
     }
   } else {
     res.status(400).json(errors);

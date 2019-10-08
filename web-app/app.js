@@ -19,18 +19,29 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(function (req, res, next) {
+  var origen = req.header("Origin")
+  if (!origen) origen = '*'
+  res.header('Access-Control-Allow-Origin', origen)
+  res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization, X-Requested-With, X-XSRF-TOKEN')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+  res.header('Access-Control-Allow-Credentials', 'true')
+  next()
+})
+
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/demos', demosRouter);
-app.use('/personas', personasRouter);
-app.use('/api', apiRouter);
+
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/demos', demosRouter);
+app.use('/personas', personasRouter);
+app.use('/api', apiRouter);
 app.use('/files', express.static('uploads'))
 app.get('/fileupload', function (req, res) {
   res.status(200).end(`
